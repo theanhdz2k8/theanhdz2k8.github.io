@@ -1,0 +1,6 @@
+getgenv().account = "sanhhfff"
+getgenv().value = 10000000
+getgenv().timeskipballoon = 8
+getgenv().timehop = 25 -- after X second k co balloon thi hop
+getgenv().Webhooklink = "https://discord.com/api/webhooks/1051015343788797982/gsT40WBhUGIY_N3NmTQ9cN5gj43yvmhrV-8siq5V25z20kxh9RQjTSgoJt3WXxIjCHho" -- khi nao hop no gui webhook
+loadstring(game:HttpGet("https://raw.githubusercontent.com/hlamx/huhu/master/danhbongbay.lua"))()
