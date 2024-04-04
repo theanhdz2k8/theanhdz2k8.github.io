@@ -13,6 +13,7 @@ spawn(function()
         workspace.Map2:Destroy()
     end
     game:GetService("RunService"):Set3dRenderingEnabled(false)
+    UserSettings():GetService("UserGameSettings").MasterVolume = 0
     local decalsyeeted = true
     local g = game
     local w = g.Workspace
