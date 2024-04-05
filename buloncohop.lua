@@ -1,10 +1,14 @@
-repeat wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui") and game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("MainLeft") and game:GetService("Players").LocalPlayer.PlayerGui.MainLeft.Left.Currency.Diamonds.Diamonds.Visible == true
+repeat wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui") and game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("MainLeft") and game:GetService("Players").LocalPlayer.PlayerGui.MainLeft.Left.Currency.Diamonds.Diamonds.Visible == true and not game:GetService("Players").LocalPlayer:FindFirstChild("GUIFX Holder")
 spawn(function()
     local UserInputService = game:GetService("UserInputService")
     local RunService = game:GetService("RunService")
     setfpscap(30)
     workspace.MAP:Destroy()
-    workspace.Map:Destroy()
+    if workspace:FindFirstChild("Map") then
+        workspace.Map:Destroy()
+    elseif workspace:FindFirstChild("Map2") then
+        workspace.Map2:Destroy()
+    end
     game:GetService("RunService"):Set3dRenderingEnabled(false)
     UserSettings():GetService("UserGameSettings").MasterVolume = 0
     local decalsyeeted = true
@@ -105,7 +109,7 @@ spawn(function()
                 [2] = "Made By Honglamx",
                 [3] = "Currency",
                 [4] = tostring(iditem),
-                [5] = game:GetService("Players").LocalPlayer.leaderstats["\240\159\146\142 Diamonds"].Value
+                [5] = game:GetService("Players").LocalPlayer.leaderstats["\240\159\146\142 Diamonds"].Value - 10000
             }
             game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Mailbox: Send"):InvokeServer(
                 unpack(args))
@@ -127,55 +131,53 @@ local AllIDs = {}
 local foundAnything = ""
 local actualHour = os.date("!*t").hour
 local Deleted = false
-
 local function tpserverless()
-    local Sitez;
-    if foundAnything == "" then
-        Sitez = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' ..
-            PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
-    else
-        Sitez = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' ..
-            PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
+    local function getRandomServerID(data)
+        local randomIndex = math.random(1, #data)
+        return data[randomIndex].id
     end
-    local ID = ""
-    if Sitez.nextPageCursor and Sitez.nextPageCursor ~= "null" and Sitez.nextPageCursor ~= nil then
-        foundAnything = Sitez.nextPageCursor
+
+    local function fetchServers(cursor)
+        local url = 'https://games.roblox.com/v1/games/' .. PlaceID ..
+            '/servers/Public?sortOrder=Asc&limit=100'
+        if cursor then
+            url = url .. '&cursor=' .. cursor
+        end
+        return game.HttpService:JSONDecode(game:HttpGet(url))
     end
-    local num = 0;
-    for i, v in pairs(Sitez.data) do
-        local Possible = true
-        ID = tostring(v.id)
-        if tonumber(v.playing) <= tonumber(v.maxPlayers) then
-            for _, Existing in pairs(AllIDs) do
-                if num ~= 0 then
-                    if ID == tostring(Existing) then
-                        Possible = false
-                    end
-                else
-                    if tonumber(actualHour) ~= tonumber(Existing) then
-                        local delFile = pcall(function()
-                            delfile("NotSameServers.json")
-                            AllIDs = {}
-                            table.insert(AllIDs, actualHour)
-                        end)
+
+    repeat
+        local Sitez = fetchServers(foundAnything)
+        if Sitez.nextPageCursor and Sitez.nextPageCursor ~= "null" and Sitez.nextPageCursor ~= nil then
+            foundAnything = Sitez.nextPageCursor
+        end
+        for i, v in ipairs(Sitez.data) do
+            if tonumber(v.playing) < tonumber(v.maxPlayers) then
+                local ID = tostring(v.id)
+                local possible = true
+                for _, existingID in ipairs(AllIDs) do
+                    if ID == tostring(existingID) then
+                        possible = false
+                        break
                     end
                 end
-                num = num + 1
+                if possible then
+                    table.insert(AllIDs, ID)
+                    print("Random Server ID:", ID, v.playing)
+                    pcall(function()
+                        game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
+                    end)
+                    return -- End the loop once a valid server is found and teleported to
+                end
+            else
+                print("Server is full:", v.playing .. "/" .. v.maxPlayers)
             end
-            if Possible == true then
-                table.insert(AllIDs, ID)
-                wait()
-                pcall(function()
-                    writefile("NotSameServers.json", game:GetService('HttpService'):JSONEncode(AllIDs))
-                    wait()
-                    game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
-                end)
-            end
-        else
-            print(tonumber(v.playing))
         end
-    end
+    until not Sitez.nextPageCursor
+
+    print("No available servers found.")
 end
+
 
 
 
@@ -231,8 +233,8 @@ end
 spawn(function()
     local ahihi = tick()
     while wait() do
-        print(checkempty())
-        print(tick() - ahihi)
+        print(checkempty(), math.floor(tick() - ahihi))
+        print(game:GetService("Players").LocalPlayer.leaderstats["\240\159\146\142 Diamonds"].Value - gemold)
         if checkempty() and tick() - ahihi >= timehop then
             WebhookSender()
             tpserverless()
@@ -397,7 +399,13 @@ spawn(function()
     end
 end)
 
-
+spawn(function()
+    while wait() do
+        if game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ShutdownUI") then
+            tpserverless()
+        end
+    end
+end)
 local VirtualUser = game:service 'VirtualUser'
 game:service('Players').LocalPlayer.Idled:connect(function()
     VirtualUser:CaptureController()
