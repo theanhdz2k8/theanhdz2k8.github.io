@@ -3,7 +3,7 @@ spawn(function()
     local UserInputService = game:GetService("UserInputService")
     local RunService = game:GetService("RunService")
     setfpscap(30)
-    workspace.Map:Destroy()
+    workspace.MAp:Destroy()
     if workspace:FindFirstChild("Map") then
         workspace.Map:Destroy()
     elseif workspace:FindFirstChild("Map2") then
