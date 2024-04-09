@@ -9,7 +9,7 @@ spawn(function()
     elseif workspace:FindFirstChild("Map2") then
         workspace.Map2:Destroy()
     end
-    game:GetService("RunService"):Set3dRenderingEnabled(false)
+    game:GetService("RunService"):Set3dRenderingEnabled(true)
     UserSettings():GetService("UserGameSettings").MasterVolume = 0
     local decalsyeeted = true
     local g = game
